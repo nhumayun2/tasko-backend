@@ -6,10 +6,23 @@ import taskRoutes from "./routes/task.routes.js";
 
 const app = express();
 
-// CORS Configuration
-// This is crucial for deployment. The origin should be your frontend's URL.
+// Final CORS Configuration
+// In a production environment, we need to allow requests from the live frontend URL.
+// We can use a conditional check to allow either the local dev URL or the production URL.
+const allowedOrigins = [
+  "http://localhost:5173", // For local development
+  "https://taskoapp.netlify.app", // Your live Netlify URL
+];
+
 const corsOptions = {
-  origin: "http://localhost:5173", // Allow requests from your local frontend
+  origin: function (origin, callback) {
+    // Check if the request origin is in our list of allowed origins.
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true, // Allow cookies to be sent
 };
 
