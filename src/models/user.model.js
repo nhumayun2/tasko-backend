@@ -23,6 +23,25 @@ const userSchema = mongoose.Schema(
     },
     resetPasswordToken: String, // Field to store the hashed reset token
     resetPasswordExpire: Date, // Field to store the expiry time for the token
+    friends: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    friendRequests: [
+      {
+        sender: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        status: {
+          type: String,
+          enum: ["pending", "accepted", "rejected"],
+          default: "pending",
+        },
+      },
+    ],
   },
   {
     timestamps: true,

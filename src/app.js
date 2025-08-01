@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import userRoutes from "./routes/user.routes.js";
 import taskRoutes from "./routes/task.routes.js";
+import friendsRoutes from "./routes/friends.routes.js";
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/users", userRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use("/api/friends", friendsRoutes);
 
 // 404 Not Found Handler
 app.use((req, res, next) => {
