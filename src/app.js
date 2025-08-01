@@ -2,15 +2,24 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import userRoutes from "./routes/user.routes.js";
-import taskRoutes from "./routes/task.routes.js"; // Import task routes
+import taskRoutes from "./routes/task.routes.js";
 
 const app = express();
 
+// CORS Configuration
+// This is crucial for deployment. The origin should be your frontend's URL.
+const corsOptions = {
+  origin: "http://localhost:5173", // Allow requests from your local frontend
+  credentials: true, // Allow cookies to be sent
+};
+
+// Basic Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors(corsOptions)); // Use configured CORS middleware
 app.use(helmet());
 
+// API Routes
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
@@ -20,14 +29,16 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/users", userRoutes);
-app.use("/api/tasks", taskRoutes); // Mount task routes at /api/tasks
+app.use("/api/tasks", taskRoutes);
 
+// 404 Not Found Handler
 app.use((req, res, next) => {
   const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
   next(error);
 });
 
+// Enhanced Error Handling Middleware
 app.use((err, req, res, next) => {
   let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
   let message = err.message;
