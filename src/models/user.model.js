@@ -7,7 +7,7 @@ const userSchema = mongoose.Schema(
     username: {
       type: String,
       required: true,
-      unique: true,
+      // Removed: unique: true,
       trim: true,
     },
     email: {
@@ -57,11 +57,6 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  // REMOVE THESE DEBUG LOGS AFTER TESTING
-  // console.log('--- Password Comparison Debug ---');
-  // console.log('Entered Password (plaintext):', enteredPassword);
-  // console.log('Stored Hashed Password:', this.password);
-  // console.log('--- End Debug ---');
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
