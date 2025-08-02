@@ -69,9 +69,9 @@ const requestPasswordReset = async (email) => {
   // For this project, we'll return the token directly for testing.
   // const resetUrl = `${process.env.FRONTEND_URL}/resetpassword/${resetToken}`;
   // await sendEmail({
-  //   email: user.email,
-  //   subject: 'Password Reset Token',
-  //   message: `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`
+  //   email: user.email,
+  //   subject: 'Password Reset Token',
+  //   message: `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`
   // });
 
   return {
@@ -108,4 +108,22 @@ const resetPassword = async (token, newPassword) => {
   return { message: "Password reset successful" };
 };
 
-export { registerUser, authUser, requestPasswordReset, resetPassword };
+// New function to fetch a user's friends list
+const getFriendsList = async (userId) => {
+  const user = await User.findById(userId).populate(
+    "friends",
+    "username email"
+  );
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user.friends;
+};
+
+export {
+  registerUser,
+  authUser,
+  requestPasswordReset,
+  resetPassword,
+  getFriendsList,
+};

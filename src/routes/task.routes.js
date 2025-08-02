@@ -5,6 +5,7 @@ import {
   getTaskByIdController,
   updateTaskController,
   deleteTaskController,
+  getCollaborativeTasksController, // Import the new controller
 } from "../controllers/task.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
 import {
@@ -19,6 +20,9 @@ router
   .route("/")
   .post(protect, taskValidationRules(), validate, createNewTaskController) // Apply validation
   .get(protect, getTasksController);
+
+// New route to get collaborative tasks
+router.route("/collaborative").get(protect, getCollaborativeTasksController);
 
 router
   .route("/:id")

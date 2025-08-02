@@ -6,13 +6,21 @@ import {
   deleteTask,
 } from "../services/task.service.js";
 
-// @desc    Create a new task
-// @route   POST /api/tasks
-// @access  Private
+// @desc  Create a new task
+// @route POST /api/tasks
+// @access Private
 const createNewTaskController = async (req, res, next) => {
   try {
-    const { title, description, status, priority, category, points, dueDate } =
-      req.body; // Added category, points
+    const {
+      title,
+      description,
+      status,
+      priority,
+      category,
+      points,
+      dueDate,
+      collaborators,
+    } = req.body;
     const task = await createTask(
       req.user._id,
       title,
@@ -21,7 +29,8 @@ const createNewTaskController = async (req, res, next) => {
       priority,
       category,
       points,
-      dueDate
+      dueDate,
+      collaborators // Pass the new collaborators field
     );
     res.status(201).json(task);
   } catch (error) {
@@ -29,9 +38,9 @@ const createNewTaskController = async (req, res, next) => {
   }
 };
 
-// @desc    Get all tasks for the authenticated user
-// @route   GET /api/tasks
-// @access  Private
+// @desc  Get all tasks for the authenticated user
+// @route GET /api/tasks
+// @access Private
 const getTasksController = async (req, res, next) => {
   try {
     const tasks = await getTasksByUserId(req.user._id);
@@ -41,9 +50,25 @@ const getTasksController = async (req, res, next) => {
   }
 };
 
-// @desc    Get a single task by ID
-// @route   GET /api/tasks/:id
-// @access  Private
+// @desc  Get all collaborative tasks for the authenticated user
+// @route GET /api/tasks/collaborative
+// @access Private
+const getCollaborativeTasksController = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    // Find tasks where the user is either the owner or a collaborator
+    const tasks = await Task.find({
+      $or: [{ user: userId }, { collaborators: userId }],
+    });
+    res.json(tasks);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc  Get a single task by ID
+// @route GET /api/tasks/:id
+// @access Private
 const getTaskByIdController = async (req, res, next) => {
   try {
     const task = await getTaskById(req.params.id, req.user._id);
@@ -53,13 +78,21 @@ const getTaskByIdController = async (req, res, next) => {
   }
 };
 
-// @desc    Update a task
-// @route   PUT /api/tasks/:id
-// @access  Private
+// @desc  Update a task
+// @route PUT /api/tasks/:id
+// @access Private
 const updateTaskController = async (req, res, next) => {
   try {
-    const { title, description, status, priority, category, points, dueDate } =
-      req.body; // Added category, points
+    const {
+      title,
+      description,
+      status,
+      priority,
+      category,
+      points,
+      dueDate,
+      collaborators,
+    } = req.body;
     const updateData = {
       title,
       description,
@@ -68,7 +101,8 @@ const updateTaskController = async (req, res, next) => {
       category,
       points,
       dueDate,
-    }; // Added category, points
+      collaborators, // Pass the new collaborators field
+    };
     const updatedTask = await updateTask(
       req.params.id,
       req.user._id,
@@ -80,9 +114,9 @@ const updateTaskController = async (req, res, next) => {
   }
 };
 
-// @desc    Delete a task
-// @route   DELETE /api/tasks/:id
-// @access  Private
+// @desc  Delete a task
+// @route DELETE /api/tasks/:id
+// @access Private
 const deleteTaskController = async (req, res, next) => {
   try {
     const message = await deleteTask(req.params.id, req.user._id);
@@ -98,4 +132,5 @@ export {
   getTaskByIdController,
   updateTaskController,
   deleteTaskController,
+  getCollaborativeTasksController,
 };

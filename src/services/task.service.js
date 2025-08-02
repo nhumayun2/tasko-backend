@@ -9,7 +9,8 @@ const createTask = async (
   priority,
   category,
   points,
-  dueDate
+  dueDate,
+  collaborators // New parameter
 ) => {
   const task = await Task.create({
     user: userId,
@@ -17,9 +18,10 @@ const createTask = async (
     description,
     status,
     priority,
-    category, // Added category
-    points, // Added points
+    category,
+    points,
     dueDate,
+    collaborators, // Pass the new field to the model
   });
   return task;
 };
@@ -58,11 +60,17 @@ const updateTask = async (taskId, userId, updateData) => {
   task.priority =
     updateData.priority !== undefined ? updateData.priority : task.priority;
   task.category =
-    updateData.category !== undefined ? updateData.category : task.category; // Added category
+    updateData.category !== undefined ? updateData.category : task.category;
   task.points =
-    updateData.points !== undefined ? updateData.points : task.points; // Added points
+    updateData.points !== undefined ? updateData.points : task.points;
   task.dueDate =
     updateData.dueDate !== undefined ? updateData.dueDate : task.dueDate;
+
+  // New: Update the collaborators field
+  task.collaborators =
+    updateData.collaborators !== undefined
+      ? updateData.collaborators
+      : task.collaborators;
 
   const updatedTask = await task.save();
   return updatedTask;

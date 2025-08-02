@@ -49,6 +49,12 @@ const taskSchema = mongoose.Schema(
     dueDate: {
       type: Date,
     },
+    collaborators: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true,
