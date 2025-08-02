@@ -1,3 +1,4 @@
+import Task from "../models/task.model.js"; // Import the Task model
 import {
   createTask,
   getTasksByUserId,
@@ -59,7 +60,9 @@ const getCollaborativeTasksController = async (req, res, next) => {
     // Find tasks where the user is either the owner or a collaborator
     const tasks = await Task.find({
       $or: [{ user: userId }, { collaborators: userId }],
-    });
+    })
+      .populate("user", "username email")
+      .populate("collaborators", "username email");
     res.json(tasks);
   } catch (error) {
     next(error);

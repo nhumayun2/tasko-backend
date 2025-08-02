@@ -1,8 +1,8 @@
 import User from "../models/user.model.js";
 
-// @desc    Get all users (excluding the current user and friends) for "Add New Friends" list
-// @route   GET /api/friends/users
-// @access  Private
+// @desc  Get all users (excluding the current user and friends) for "Add New Friends" list
+// @route GET /api/friends/users
+// @access Private
 const getAllUsersController = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -10,7 +10,7 @@ const getAllUsersController = async (req, res, next) => {
       "friends friendRequests"
     );
 
-    // Get all user IDs to exclude from the list (current user + friends)
+    // Get all user IDs to exclude from the list (current user + friends + sent/received requests)
     const excludedUserIds = [
       userId,
       ...currentUser.friends,
@@ -27,9 +27,9 @@ const getAllUsersController = async (req, res, next) => {
   }
 };
 
-// @desc    Send a friend request
-// @route   POST /api/friends/request/:recipientId
-// @access  Private
+// @desc  Send a friend request
+// @route POST /api/friends/request/:recipientId
+// @access Private
 const sendFriendRequestController = async (req, res, next) => {
   try {
     const senderId = req.user._id;
@@ -75,9 +75,9 @@ const sendFriendRequestController = async (req, res, next) => {
   }
 };
 
-// @desc    Accept a friend request
-// @route   PUT /api/friends/accept/:requestId
-// @access  Private
+// @desc  Accept a friend request
+// @route PUT /api/friends/accept/:requestId
+// @access Private
 const acceptFriendRequestController = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -118,9 +118,41 @@ const acceptFriendRequestController = async (req, res, next) => {
   }
 };
 
-// @desc    Get friends list for the current user
-// @route   GET /api/friends/list
-// @access  Private
+// @desc  Reject a friend request
+// @route DELETE /api/friends/reject/:requestId
+// @access Private
+const rejectFriendRequestController = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { requestId } = req.params;
+
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    // Find the request and remove it
+    const requestIndex = currentUser.friendRequests.findIndex(
+      (req) => req._id.toString() === requestId
+    );
+    if (requestIndex === -1) {
+      res.status(404);
+      throw new Error("Friend request not found");
+    }
+
+    currentUser.friendRequests.splice(requestIndex, 1);
+    await currentUser.save();
+
+    res.status(200).json({ message: "Friend request rejected" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc  Get friends list for the current user
+// @route GET /api/friends/list
+// @access Private
 const getFriendsListController = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -135,9 +167,9 @@ const getFriendsListController = async (req, res, next) => {
   }
 };
 
-// @desc    Get incoming friend requests for the current user
-// @route   GET /api/friends/requests
-// @access  Private
+// @desc  Get incoming friend requests for the current user
+// @route GET /api/friends/requests
+// @access Private
 const getFriendRequestsController = async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -156,6 +188,7 @@ export {
   getAllUsersController,
   sendFriendRequestController,
   acceptFriendRequestController,
+  rejectFriendRequestController, // Export the new controller
   getFriendsListController,
   getFriendRequestsController,
 };
