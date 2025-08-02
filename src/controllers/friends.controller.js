@@ -6,15 +6,19 @@ import User from "../models/user.model.js";
 const getAllUsersController = async (req, res, next) => {
   try {
     const userId = req.user._id;
-    const currentUser = await User.findById(userId).select(
-      "friends friendRequests"
-    );
 
-    // Get all user IDs to exclude from the list (current user + friends + sent/received requests)
+    // Fetch the current user and their friends and outgoing requests
+    const currentUser = await User.findById(userId).select("friends");
+    const otherUsers = await User.find({
+      _id: { $ne: userId },
+    }).select("username friends");
+
+    // Get all user IDs to exclude from the list (current user + friends + sent requests)
+    // This is the new, corrected logic
     const excludedUserIds = [
       userId,
       ...currentUser.friends,
-      ...currentUser.friendRequests.map((req) => req.sender),
+      ...(await User.find({ "friendRequests.sender": userId }).distinct("_id")),
     ];
 
     const users = await User.find({
@@ -188,7 +192,7 @@ export {
   getAllUsersController,
   sendFriendRequestController,
   acceptFriendRequestController,
-  rejectFriendRequestController, // Export the new controller
+  rejectFriendRequestController,
   getFriendsListController,
   getFriendRequestsController,
 };
